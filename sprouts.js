@@ -109,18 +109,27 @@ function onMouseDrag(event) {
 
 function onMouseUp(event) {
   if (path != null) {
-    var ending_sprout = nearest_sprout(event.point);
-    if (ending_sprout == null) {
+    if (path._segments.length < 3) {
+      // Prevent sprouts overlapping.
       path.remove();
     } else {
-      var point = ending_sprout.getNearestLocation(event.point);
-      path.add(point);
-      path.simplify(10);
-      curves.push(path);
-      var sprout = new_sprout(path.getPointAt(path.length / 2));
-      sprouts.push(sprout);
-      add_links(sprout, starting_sprout);
-      add_links(sprout, ending_sprout);
+      var ending_sprout = nearest_sprout(event.point);
+      if (ending_sprout == null) {
+        path.remove();
+      } else if (ending_sprout == starting_sprout &&
+                 starting_sprout.data.links.length > 1) {
+        // Prevent looping on a sprout with no room for two more links.
+        path.remove()
+      } else {
+        var point = ending_sprout.getNearestLocation(event.point);
+        path.add(point);
+        path.simplify(10);
+        curves.push(path);
+        var sprout = new_sprout(path.getPointAt(path.length / 2));
+        sprouts.push(sprout);
+        add_links(sprout, starting_sprout);
+        add_links(sprout, ending_sprout);
+      }
     }
   }
 }
