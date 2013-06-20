@@ -1,7 +1,7 @@
 * Sprouts game board
 
 Sprouts is yet another game invented by John Conway!  There is an
-article about it in [[http://nrich.maths.org/2413][Sprouts Explained : nrich.maths.org]].
+article about it in [[http://nrich.maths.org/2413][Sprouts Explained]].
 
 ** Installation
 
