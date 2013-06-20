@@ -1,15 +1,24 @@
 * Sprouts game board
 
-This is an tiny exercise for me to play with =pretty.js= and JavaScript,
-which I publish a bit prematurely for the sake of collaboration.  The
-tool is still very modest, a lot of details are missing, big and
-small.
+Sprouts is yet another game invented by John Conway!  There is an
+article about it in [[http://nrich.maths.org/2413][Sprouts Explained : nrich.maths.org]].
 
-You need a prepared copy of [[http://paperjs.org/][Paper.js]].  I keep mine in the =js/=
-subdirectory of the Web site: adjust to taste!
+** Installation
+
+To install, you also need a prepared copy of [[http://paperjs.org/][Paper.js]].  I keep mine in
+the =js/= subdirectory of the Web site: adjust to taste!
+
+** Usage
 
 To play, get the mouse near a sprout (not on the sprout itself, I
 reserve this for something else), then click and drag near another (or
 the same) sprout.  To re-initialize the game, reload the page.
+
+** Justification
+
+This is an tiny exercise for me to play with =paper.js= and JavaScript,
+which I publish a bit prematurely for the sake of collaboration.  The
+tool is still very modest, a lot of details are missing, big and
+small.
 
 François
