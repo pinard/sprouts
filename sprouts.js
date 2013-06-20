@@ -116,6 +116,10 @@ function onMouseUp(event) {
       var ending_sprout = nearest_sprout(event.point);
       if (ending_sprout == null) {
         path.remove();
+      } else if (ending_sprout == starting_sprout &&
+                 starting_sprout.data.links.length > 1) {
+        // Prevent looping on a sprout with no room for two more links.
+        path.remove()
       } else {
         var point = ending_sprout.getNearestLocation(event.point);
         path.add(point);
