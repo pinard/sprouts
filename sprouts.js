@@ -10,6 +10,7 @@ tool.minDistance = 15;
 var path = null;
 
 // Sprouts.
+var radius = 12;
 var starting_sprout;
 add_initial_sprouts(3);
 
@@ -59,7 +60,7 @@ function new_sprout(center) {
   sprout_layer.activate()
   var sprout = new Path.Circle({
     center: center,
-    radius: 12,
+    radius: radius,
     fillColor: 'orange',
     strokeColor: 'red',
     strokeWidth: 4
@@ -76,6 +77,7 @@ function new_sprout(center) {
       sprout.fillColor = 'orange';
     }
   });
+  curve_layer.activate();
   return sprout;
 }
 
@@ -83,7 +85,6 @@ function onMouseDown(event) {
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
   var point = starting_sprout.getNearestLocation(event.point);
-  curve_layer.activate();
   path = new Path({
     segments: [point],
     strokeColor: 'brown',
@@ -130,6 +131,9 @@ function onMouseUp(event) {
   }
   path.simplify(10);
   var sprout = new_sprout(path.getPointAt(path.length / 2));
+  var path2 = path.split(path.length / 2 - radius);
+  path2.split(2 * radius);
+  path2.remove();
   path = null;
   add_links(sprout, starting_sprout);
   add_links(sprout, ending_sprout);
