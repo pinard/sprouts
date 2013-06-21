@@ -42,17 +42,22 @@ function add_links(sprout1, sprout2, curve) {
 }
 
 function nearest_sprout(point) {
+  var ambiguous = true;
   var best = null;
-  var counter;
-  for (counter = 0; counter < sprout_layer.children.length; counter++) {
-    var sprout = sprout_layer.children[counter];
+  sprout_layer.children.forEach(function(sprout) {
     var distance = (sprout.data.center - point).length
-    if (distance < 100 && sprout.data.links.length < 3) {
-      if (best == null || 2 * distance < (best.data.center - point).length) {
-        best = sprout;
+    if (distance < 100) {
+      if (sprout.data.links.length < 3) {
+        if (best == null || 2 * distance < (best.data.center - point).length) {
+          ambiguous = false;
+          best = sprout;
+        } else if (distance < 2 * (best.data.center - point).length) {
+          ambiguous = true;
+        }
       }
     }
-  };
+  });
+  if (ambiguous) return null;
   return best;
 }
 
