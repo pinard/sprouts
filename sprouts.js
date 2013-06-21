@@ -86,6 +86,28 @@ function new_sprout(center) {
   return sprout;
 }
 
+function onFrame(event) {
+  if (drawing != null) return;
+  var barysum = new Point(0, 0);
+  sprout_layer.children.forEach(function(sprout) {
+    barysum += sprout.data.center;
+  });
+  var delta = view.center - (barysum / sprout_layer.children.length);
+  if (Math.abs(delta.x) > Math.abs(delta.y) + 2) {
+    delta = (delta / Math.abs(delta.x)).round();
+  } else if (Math.abs(delta.y) > Math.abs(delta.x) + 2) {
+    delta = (delta / Math.abs(delta.y)).round();
+  } else {
+    return;
+  }
+  project.layers.forEach(function(layer) {
+    layer.children.forEach(function(path) {
+      translate_path(path, delta);
+      if (layer == sprout_layer) path.data.center += delta;
+    })
+  })
+}
+
 function onMouseDown(event) {
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
@@ -149,10 +171,16 @@ function onMouseUp(event) {
 
 function drawing_touches_anything() {
   for (var counter = 0; counter < curve_layer.children.length; counter++) {
-    curve = curve_layer.children[counter]
+    var curve = curve_layer.children[counter]
     if (curve != drawing && drawing.getIntersections(curve).length > 0) {
       return true;
     }
   };
   return false;
+}
+
+function translate_path(path, delta) {
+  path.segments.forEach(function(segment) {
+    segment.point += delta;
+  })
 }
