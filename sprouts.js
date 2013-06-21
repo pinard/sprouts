@@ -7,7 +7,7 @@ var sprout_layer = new Layer();
 
 // Curves.
 tool.minDistance = 15;
-var path = null;
+var drawing = null;
 
 // Sprouts.
 var radius = 12;
@@ -85,7 +85,7 @@ function onMouseDown(event) {
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
   var point = starting_sprout.getNearestLocation(event.point);
-  path = new Path({
+  drawing = new Path({
     segments: [point],
     strokeColor: 'brown',
     strokeWidth: 3
@@ -93,56 +93,61 @@ function onMouseDown(event) {
 }
 
 function onMouseDrag(event) {
-  if (path == null) return;
-  path.add(event.point);
-  if (path_touches_anything()) {
-    path.remove();
-    path = null;
+  if (drawing == null) return;
+  drawing.add(event.point);
+  if (drawing_touches_anything()) {
+    drawing.remove();
+    drawing = null;
   }
 }
 
 function onMouseUp(event) {
-  if (path == null) return;
-  if (path._segments.length < 3) {
+  if (drawing == null) return;
+  if (drawing._segments.length < 3) {
     // Prevent sprouts overlapping.
-    path.remove();
-    path = null;
+    drawing.remove();
+    drawing = null;
     return;
   }
   var ending_sprout = nearest_sprout(event.point);
   if (ending_sprout == null) {
-    path.remove();
-    path = null;
+    drawing.remove();
+    drawing = null;
     return;
   }
   if (ending_sprout == starting_sprout &&
       starting_sprout.data.links.length > 1) {
     // Prevent looping on a sprout with no room for two more links.
-    path.remove();
-    path = null;
+    drawing.remove();
+    drawing = null;
     return;
   }
   var point = ending_sprout.getNearestLocation(event.point);
-  path.add(point);
-  if (path_touches_anything()) {
-    path.remove();
-    path = null;
+  drawing.add(point);
+  if (drawing_touches_anything()) {
+    drawing.remove();
+    drawing = null;
     return;
   }
-  path.simplify(10);
-  var sprout = new_sprout(path.getPointAt(path.length / 2));
-  var path2 = path.split(path.length / 2 - radius);
-  path2.split(2 * radius);
-  path2.remove();
-  path = null;
+  drawing.simplify(10);
+
+  // Add a new sprout in the middle, and split the curve in two.
+  var sprout = new_sprout(drawing.getPointAt(drawing.length / 2));
+  var curve1 = drawing;
+  drawing = curve1.split(curve1.length / 2 - radius);
+  var curve2 = drawing.split(2 * radius);
+  drawing.remove();
+  drawing = null;
   add_links(sprout, starting_sprout);
   add_links(sprout, ending_sprout);
 }
 
-function path_touches_anything() {
+function drawing_touches_anything() {
   for (var counter = 0; counter < curve_layer.children.length; counter++) {
     curve = curve_layer.children[counter]
-    if (curve != path && path.getIntersections(curve).length > 0) return true;
+    if (curve != drawing && drawing.getIntersections(curve).length > 0) {
+      return true;
+    }
   };
   return false;
 }
