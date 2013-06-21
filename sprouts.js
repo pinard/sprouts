@@ -28,13 +28,13 @@ function add_initial_sprouts(count) {
   }
 }
 
-function add_links(sprout1, sprout2) {
-  sprout1.data.links.push(sprout2);
-  sprout2.data.links.push(sprout1);
+function add_links(sprout1, sprout2, curve) {
+  sprout1.data.links.push([sprout2, curve, true]);
+  sprout2.data.links.push([sprout1, curve, false]);
   if (sprout1.data.links.length > 2) {
     sprout1.fillColor = 'magenta';
     sprout1.strokeColor = 'blue';
-  }
+  };
   if (sprout2.data.links.length > 2) {
     sprout2.fillColor = 'magenta';
     sprout2.strokeColor = 'blue';
@@ -138,8 +138,8 @@ function onMouseUp(event) {
   var curve2 = drawing.split(2 * radius);
   drawing.remove();
   drawing = null;
-  add_links(sprout, starting_sprout);
-  add_links(sprout, ending_sprout);
+  add_links(starting_sprout, sprout, curve1);
+  add_links(sprout, ending_sprout, curve2);
 }
 
 function drawing_touches_anything() {
