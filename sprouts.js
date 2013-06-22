@@ -2,16 +2,24 @@
 // François Pinard, 2013-06.
 
 // Layers.
-var curve_layer = project.activeLayer;
+var drawing_layer = project.activeLayer;
 var sprout_layer = new Layer();
 
-// Curves.
+// Drawings.
 tool.minDistance = 15;
-var drawing = null;
+var current_drawing = null;
+var starting_sprout;
 
 // Sprouts.
 var radius = 12;
-var starting_sprout;
+var alive_inside = 'orange';
+var alive_outside = 'red';
+var alive_over = 'yellow';
+var dead_inside = 'magenta';
+var dead_outside = 'blue';
+var dead_over = 'cyan';
+var selected_sprout = null;
+
 add_initial_sprouts(3);
 
 // Functions.
@@ -28,16 +36,16 @@ function add_initial_sprouts(count) {
   }
 }
 
-function add_links(sprout1, sprout2, curve) {
-  sprout1.data.links.push([sprout2, curve, true]);
-  sprout2.data.links.push([sprout1, curve, false]);
+function add_links(sprout1, sprout2, drawing) {
+  sprout1.data.links.push([sprout2, drawing, true]);
+  sprout2.data.links.push([sprout1, drawing, false]);
   if (sprout1.data.links.length > 2) {
-    sprout1.fillColor = 'magenta';
-    sprout1.strokeColor = 'blue';
+    sprout1.fillColor = dead_inside;
+    sprout1.strokeColor = dead_outside;
   };
   if (sprout2.data.links.length > 2) {
-    sprout2.fillColor = 'magenta';
-    sprout2.strokeColor = 'blue';
+    sprout2.fillColor = dead_inside;
+    sprout2.strokeColor = dead_outside;
   }
 }
 
@@ -66,23 +74,15 @@ function new_sprout(center) {
   var sprout = new Path.Circle({
     center: center,
     radius: radius,
-    fillColor: 'orange',
-    strokeColor: 'red',
+    fillColor: alive_inside,
+    strokeColor: alive_outside,
     strokeWidth: 4
   });
   sprout.data.center = center;
   sprout.data.links = []
-  sprout.on('mouseenter', function() {
-    if (sprout.data.links.length < 3) {
-      sprout.fillColor = 'yellow';
-    }
-  });
-  sprout.on('mouseleave', function() {
-    if (sprout.data.links.length < 3) {
-      sprout.fillColor = 'orange';
-    }
-  });
-  curve_layer.activate();
+  sprout.on('mouseenter', function() { sprout_select(sprout); });
+  sprout.on('mouseleave', function() { sprout_deselect(sprout); });
+  drawing_layer.activate();
   return sprout;
 }
 
@@ -90,7 +90,7 @@ function onMouseDown(event) {
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
   var point = starting_sprout.getNearestLocation(event.point);
-  drawing = new Path({
+  current_drawing = new Path({
     segments: [point],
     strokeColor: 'brown',
     strokeWidth: 3
@@ -98,61 +98,80 @@ function onMouseDown(event) {
 }
 
 function onMouseDrag(event) {
-  if (drawing == null) return;
-  drawing.add(event.point);
-  if (drawing_touches_anything()) {
-    drawing.remove();
-    drawing = null;
+  if (current_drawing == null) return;
+  current_drawing.add(event.point);
+  if (touches_any_drawing(current_drawing)) {
+    current_drawing.remove();
+    current_drawing = null;
   }
 }
 
 function onMouseUp(event) {
-  if (drawing == null) return;
-  if (drawing._segments.length < 3) {
+  if (current_drawing == null) return;
+  if (current_drawing.segments.length < 3) {
     // Prevent sprouts overlapping.
-    drawing.remove();
-    drawing = null;
+    current_drawing.remove();
+    current_drawing = null;
     return;
   }
   var ending_sprout = nearest_sprout(event.point);
   if (ending_sprout == null) {
-    drawing.remove();
-    drawing = null;
+    current_drawing.remove();
+    current_drawing = null;
     return;
   }
   if (ending_sprout == starting_sprout &&
       starting_sprout.data.links.length > 1) {
     // Prevent looping on a sprout with no room for two more links.
-    drawing.remove();
-    drawing = null;
+    current_drawing.remove();
+    current_drawing = null;
     return;
   }
   var point = ending_sprout.getNearestLocation(event.point);
-  drawing.add(point);
-  if (drawing_touches_anything()) {
-    drawing.remove();
-    drawing = null;
+  current_drawing.add(point);
+  if (touches_any_drawing(current_drawing)) {
+    current_drawing.remove();
+    current_drawing = null;
     return;
   }
-  drawing.simplify(10);
+  current_drawing.simplify(10);
 
-  // Add a new sprout in the middle, and split the curve in two.
-  var sprout = new_sprout(drawing.getPointAt(drawing.length / 2));
-  var curve1 = drawing;
-  drawing = curve1.split(curve1.length / 2 - radius);
-  var curve2 = drawing.split(2 * radius);
-  drawing.remove();
-  drawing = null;
-  add_links(starting_sprout, sprout, curve1);
-  add_links(sprout, ending_sprout, curve2);
+  // Add a new sprout in the middle, and split the drawing in two.
+  var sprout = new_sprout(
+    current_drawing.getPointAt(current_drawing.length / 2));
+  var drawing1 = current_drawing;
+  current_drawing = drawing1.split(drawing1.length / 2 - radius);
+  var drawing2 = current_drawing.split(2 * radius);
+  current_drawing.remove();
+  current_drawing = null;
+  add_links(starting_sprout, sprout, drawing1);
+  add_links(sprout, ending_sprout, drawing2);
 }
 
-function drawing_touches_anything() {
-  for (var counter = 0; counter < curve_layer.children.length; counter++) {
-    curve = curve_layer.children[counter]
-    if (curve != drawing && drawing.getIntersections(curve).length > 0) {
+function touches_any_drawing(path) {
+  for (var counter = 0; counter < drawing_layer.children.length; counter++) {
+    var drawing = drawing_layer.children[counter]
+    if (path != drawing && path.getIntersections(drawing).length > 0) {
       return true;
     }
   };
   return false;
+}
+
+function sprout_deselect(sprout) {
+  selected_sprout = null;
+  if (sprout.data.links.length < 3) {
+    sprout.fillColor = alive_inside;
+  } else {
+    sprout.fillColor = dead_inside;
+  }
+}
+
+function sprout_select(sprout) {
+  selected_sprout = sprout;
+  if (sprout.data.links.length < 3) {
+    sprout.fillColor = alive_over;
+  } else {
+    sprout.fillColor = dead_over;
+  }
 }
