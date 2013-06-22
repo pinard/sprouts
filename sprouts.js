@@ -18,6 +18,7 @@ var alive_over = 'yellow';
 var dead_inside = 'magenta';
 var dead_outside = 'blue';
 var dead_over = 'cyan';
+var dragged_sprout = null;
 var selected_sprout = null;
 
 add_initial_sprouts(3);
@@ -87,6 +88,10 @@ function new_sprout(center) {
 }
 
 function onMouseDown(event) {
+  if (selected_sprout != null) {
+    dragged_sprout = selected_sprout;
+    return;
+  }
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
   var point = starting_sprout.getNearestLocation(event.point);
@@ -98,6 +103,10 @@ function onMouseDown(event) {
 }
 
 function onMouseDrag(event) {
+  if (dragged_sprout != null) {
+    move_sprout(dragged_sprout, event.point);
+    return;
+  }
   if (current_drawing == null) return;
   current_drawing.add(event.point);
   if (touches_any_drawing(current_drawing)) {
@@ -107,6 +116,10 @@ function onMouseDrag(event) {
 }
 
 function onMouseUp(event) {
+  if (dragged_sprout != null) {
+    dragged_sprout = null;
+    return;
+  }
   if (current_drawing == null) return;
   if (current_drawing.segments.length < 3) {
     // Prevent sprouts overlapping.
@@ -156,6 +169,34 @@ function touches_any_drawing(path) {
     }
   };
   return false;
+}
+
+function move_drawing(drawing, delta1, delta2) {
+  var segments = drawing.segments;
+  var nearest;
+  for (var counter = 0; counter < segments.length; counter++) {
+    var fraction = counter / (segments.length - 1);
+    var delta = delta1 * fraction + delta2 * (1 - fraction);
+    segments[counter].point += delta;
+  };
+  drawing.smooth();
+}
+
+function move_sprout(sprout, center) {
+  var delta = center - sprout.data.center;
+  sprout.segments.forEach(function(segment) {
+    segment.point += delta;
+  })
+  dragged_sprout.data.center = center;
+  sprout.data.links.forEach(function(link) {
+    var drawing = link[1];
+    var starting = link[2];
+    if (starting) {
+      move_drawing(drawing, new Point(0, 0), delta);
+    } else {
+      move_drawing(drawing, delta, new Point(0, 0));
+    }
+  });
 }
 
 function sprout_deselect(sprout) {
