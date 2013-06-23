@@ -3,22 +3,65 @@
 Sprouts is yet another game invented by John Conway!  There is an
 article about it in [[http://nrich.maths.org/2413][Sprouts Explained]].
 
+This project is merely an exercise for me to explore [[http://paperjs.org/][Paper.js]] and
+JavaScript.  The tool is still fairly modest, it could be improved in
+many ways, see issues below.
+
+** Playing
+
+To play, get the mouse near a sprout, but not on the sprout itself,
+then draw a connection line by clicking and dragging near another (or
+the same) sprout.  When you release the mouse, your drawing is split
+in two and a new sprout gets added in the middle.  If a region becomes
+too crowded, you may drag sprouts around by clicking directly on the
+sprouts themselves, yet pay attention while doing so at not having
+drawings crossing each other.  To re-initialize the game, reload the
+page.
+
 ** Installation
 
 To install, you also need a prepared copy of [[http://paperjs.org/][Paper.js]].  I keep mine in
 the =js/= subdirectory of the Web site: adjust to taste!
 
-** Usage
+** General issues
 
-To play, get the mouse near a sprout (not on the sprout itself, I
-reserve this for something else), then click and drag near another (or
-the same) sprout.  To re-initialize the game, reload the page.
+- Should add buttons for selecting the number of initial sprouts,
+  reinitializing the game, deciding about different colorations for
+  dead sprouts, deciding animation, etc.
 
-** Justification
+- Should add an Undo button, and maybe button to remove any sprout.
 
-This is an tiny exercise for me to play with =paper.js= and JavaScript,
-which I publish a bit prematurely for the sake of collaboration.  The
-tool is still very modest, a lot of details are missing, big and
-small.
+- A single drawing should not be allowed to cross itself.
+
+- A drawing should not touch a sprout, except the limiting ones.
+
+- An isolated, unreachable sprout should be marked dead.
+
+- The end of the game should be detected and reported.
+
+** Animation issues
+
+- Animation is explored on the =animation= branch on GitHub and stays
+  away from the =master= branch, until it becomes a bit satisfactory!
+
+- Have sprouts interact on one another using (1 / K*d - 1 / d^2), a
+  positive value attracts, a negative value repels.  In this way, two
+  sprouts in equilibrium have a distance K between them.  For now, I
+  rather tried the simpler (K - d) and found out that sprouts displace
+  far too much.  Any usable dynamic ought to correctly handle drawings
+  from the start.
+
+- Aim that the whole display occupies maybe .75 of the view area.  If
+  too big, slightly decrease K, if too small, slightly increase K.
+
+- Drawings should repel each other, and should repel neighbouring
+  sprouts as well.
+
+- Unattended drawings should progressively smooth and simplify, given
+  they stay separate of course.
+
+- Have the speed of the animation depends on the travelled distance,
+  rather than one pixel at most per frame display, bigger the distance
+  and bigger the speed.
 
 François

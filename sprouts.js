@@ -2,7 +2,13 @@
 // François Pinard, 2013-06.
 
 // Layers.
-var drawing_layer = project.activeLayer;
+var background_layer = project.activeLayer;
+new Path.Rectangle({
+  center: view.center,
+  size: view.size,
+  fillColor: 'beige'
+});
+var drawing_layer = new Layer();
 var sprout_layer = new Layer();
 
 // Drawings.
@@ -173,10 +179,12 @@ function touches_any_drawing(path) {
 
 function move_drawing(drawing, sprout1, delta1, sprout2, delta2) {
   var segments = drawing.segments;
+  var delta = delta1;
   var epsilon = (delta2 - delta1) / (segments.length - 1);
-  for (var counter = 0; counter < segments.length; counter++) {
-    segments[counter].point += delta1 + epsilon * counter;
-  };
+  segments.forEach(function(segment) {
+    segment.point += delta;
+    delta += epsilon;
+  });
   drawing.smooth();
   drawing.simplify();
   segments[0].point = sprout1.getNearestLocation(
