@@ -173,11 +173,9 @@ function touches_any_drawing(path) {
 
 function move_drawing(drawing, delta1, delta2) {
   var segments = drawing.segments;
-  var nearest;
+  var epsilon = (delta2 - delta1) / (segments.length - 1);
   for (var counter = 0; counter < segments.length; counter++) {
-    var fraction = counter / (segments.length - 1);
-    var delta = delta1 * fraction + delta2 * (1 - fraction);
-    segments[counter].point += delta;
+    segments[counter].point += delta1 + epsilon * counter;
   };
   drawing.smooth();
 }
@@ -192,9 +190,9 @@ function move_sprout(sprout, center) {
     var drawing = link[1];
     var starting = link[2];
     if (starting) {
-      move_drawing(drawing, new Point(0, 0), delta);
-    } else {
       move_drawing(drawing, delta, new Point(0, 0));
+    } else {
+      move_drawing(drawing, new Point(0, 0), delta);
     }
   });
 }
