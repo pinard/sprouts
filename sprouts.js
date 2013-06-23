@@ -94,7 +94,7 @@ function onMouseDown(event) {
   }
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
-  var point = starting_sprout.getNearestLocation(event.point);
+  var point = starting_sprout.getNearestLocation(event.point).point;
   current_drawing = new Path({
     segments: [point],
     strokeColor: 'brown',
@@ -171,13 +171,18 @@ function touches_any_drawing(path) {
   return false;
 }
 
-function move_drawing(drawing, delta1, delta2) {
+function move_drawing(drawing, sprout1, delta1, sprout2, delta2) {
   var segments = drawing.segments;
   var epsilon = (delta2 - delta1) / (segments.length - 1);
   for (var counter = 0; counter < segments.length; counter++) {
     segments[counter].point += delta1 + epsilon * counter;
   };
   drawing.smooth();
+  drawing.simplify();
+  segments[0].point = sprout1.getNearestLocation(
+    segments[1].point).point;
+  segments[segments.length - 1].point = sprout2.getNearestLocation(
+    segments[segments.length - 2].point).point;
 }
 
 function move_sprout(sprout, center) {
@@ -187,12 +192,13 @@ function move_sprout(sprout, center) {
   })
   dragged_sprout.data.center = center;
   sprout.data.links.forEach(function(link) {
+    var other = link[0];
     var drawing = link[1];
     var starting = link[2];
     if (starting) {
-      move_drawing(drawing, delta, new Point(0, 0));
+      move_drawing(drawing, sprout, delta, other, new Point(0, 0));
     } else {
-      move_drawing(drawing, new Point(0, 0), delta);
+      move_drawing(drawing, sprout, new Point(0, 0), other, delta);
     }
   });
 }
