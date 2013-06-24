@@ -1,6 +1,14 @@
 // Sprouts game board.
 // François Pinard, 2013-06.
 
+var debug = false;
+
+if (debug) {
+  function log(text) { console.log(text); }
+} else {
+  function log(text) { }
+}
+
 // Drawings
 // --------
 
@@ -52,7 +60,8 @@ function onMouseDown(event) {
     segments: [point],
     strokeColor: 'brown',
     strokeWidth: 3
-  })
+  });
+  if (debug) current_drawing.strokeWidth = 1;
 }
 
 function onMouseDrag(event) {
@@ -118,8 +127,8 @@ function onMouseUp(event) {
 // ------
 
 var background_layer = project.activeLayer;
-var drawing_layer = new Layer();
 var sprout_layer = new Layer();
+var drawing_layer = new Layer();
 
 function layer_touched(layer, path) {
   for (var counter = 0; counter < layer.children.length; counter++) {
@@ -223,6 +232,11 @@ function sprout_select(sprout) {
     sprout.fillColor = alive_over;
   } else {
     sprout.fillColor = dead_over;
+  };
+  if (debug) {
+    sprout.data.links.forEach(function(link) {
+      link.drawing.selected = true;
+    })
   }
 }
 
@@ -232,6 +246,11 @@ function sprout_unselect(sprout) {
     sprout.fillColor = alive_inside;
   } else {
     sprout.fillColor = dead_inside;
+  };
+  if (debug) {
+    sprout.data.links.forEach(function(link) {
+      link.drawing.selected = false;
+    })
   }
 }
 
