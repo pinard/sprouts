@@ -31,18 +31,20 @@ function drawing_links(drawing, sprout1, sprout2) {
 
 function drawing_move(drawing, sprout1, delta1, sprout2, delta2) {
   var segments = drawing.segments;
+  var m1 = segments.length - 1;
   var delta = delta1;
-  var epsilon = (delta2 - delta1) / (segments.length - 1);
+  var epsilon = (delta2 - delta1) / m1;
   segments.forEach(function(segment) {
     segment.point += delta;
     delta += epsilon;
   });
   drawing.smooth();
-  drawing.simplify();
-  segments[0].point = sprout1.getNearestLocation(
-    segments[1].point).point;
-  segments[segments.length - 1].point = sprout2.getNearestLocation(
-    segments[segments.length - 2].point).point;
+  var location1 = sprout1.getNearestLocation(segments[1].point);
+  segments[0].point = location1.point;
+  segments[0].handleOut.angle = sprout1.getNormalAt(location1.offset).angle;
+  var location2 = sprout2.getNearestLocation(segments[m1 - 1].point);
+  segments[m1].point = location2.point;
+  segments[m1].handleIn.angle = sprout1.getNormalAt(location2.offset).angle;
 }
 
 // Events
