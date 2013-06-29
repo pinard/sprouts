@@ -1,11 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html ng-app>
   <head>
+    <script src="js/angular.js"></script>
     <script src="js/paper.js"></script>
     <script src="sprouts.js"></script>
+    <script>
+      function Controller($scope) {
+          $scope.repaper = function() {
+              $scope.paper = paper;
+              $scope.sprout_layer = sprout_layer;
+          };
+          //$scope.repaper();
+      }
+    </script>
   </head>
-  <body>
+  <body ng-controller="Controller">
     <h3 align="center">Sprouts game board</h3>
+    <p><button ng-click="repaper()">Sync</button> Debug: {{ sprout_layer.children.length }}</p>
+    <p><input ng-model="query">Query: {{ query + ' ' + sprout_layer.children.length }}</p>
+    <ul>
+      <li ng-repeat="sprout in sprout_layer.children">{{query + ' ' + sprout}}</li>
+    </ul>
     <div align="center">
       <p>
         See <a href="http://nrich.maths.org/1208">game description</a>
