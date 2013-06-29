@@ -10,7 +10,6 @@ function log(text) {
 // Lines
 // --------
 
-tool.minDistance = 15;
 var current_line = null;
 var starting_sprout;
 
@@ -31,10 +30,10 @@ function line_move(line, sprout1, delta1, sprout2, delta2) {
   var segments = line.segments;
   var m1 = segments.length - 1;
   var delta = delta1;
-  var epsilon = (delta2 - delta1) / m1;
+  var epsilon = delta2.subtract(delta1).divide(m1);
   segments.forEach(function(segment) {
-    segment.point += delta;
-    delta += epsilon;
+    segment.point = segment.point.add(delta);
+    delta = delta.add(epsilon);
   });
   line.smooth();
   var location1 = sprout1.getNearestLocation(segments[1].point);
@@ -56,7 +55,7 @@ function onMouseDown(event) {
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
   var point = starting_sprout.getNearestLocation(event.point).point;
-  current_line = new Path({
+  current_line = new paper.Path({
     segments: [point],
     strokeColor: 'brown',
     strokeWidth: 3
@@ -126,9 +125,8 @@ function onMouseUp(event) {
 // Layers
 // ------
 
-var background_layer = project.activeLayer;
-var sprout_layer = new Layer();
-var line_layer = new Layer();
+var sprout_layer;
+var line_layer;
 
 function layer_touched(layer, path) {
   for (var counter = 0; counter < layer.children.length; counter++) {
@@ -162,12 +160,12 @@ var selected_sprout = null;
 
 function add_initial_sprouts(count) {
   var delta = 360 / count;
-  var offset = new Point();
-  var size = view.size;
+  var offset = new paper.Point();
+  var size = paper.view.size;
   offset.length = Math.min(size.width, size.height) / 3;
   offset.angle = Math.random() * delta;
   for (var counter = 0; counter < count; counter++) {
-    sprout_new(view.center + offset);
+    sprout_new(paper.view.center.add(offset));
     offset.angle += delta;
   }
 }
@@ -177,7 +175,7 @@ function nearest_sprout(point) {
   var best_sprout = null;
   var best_distance;
   sprout_layer.children.forEach(function(sprout) {
-    var distance = (sprout.data.center - point).length
+    var distance = sprout.data.center.subtract(point).length
     if (distance < 100 && sprout.data.links.length < 3) {
       if (best_sprout == null || 2 * distance < best_distance) {
         ambiguous = false;
@@ -193,25 +191,25 @@ function nearest_sprout(point) {
 }
 
 function sprout_move(sprout, center) {
-  var delta = center - sprout.data.center;
+  var delta = center.subtract(sprout.data.center);
   sprout.segments.forEach(function(segment) {
-    segment.point += delta;
+    segment.point = segment.point.add(delta);
   })
   dragged_sprout.data.center = center;
   sprout.data.links.forEach(function(link) {
     if (link.starting) {
       line_move(link.line,
-                   sprout, delta, link.sprout, new Point(0, 0));
+                   sprout, delta, link.sprout, new paper.Point(0, 0));
     } else {
       line_move(link.line,
-                   sprout, new Point(0, 0), link.sprout, delta);
+                   sprout, new paper.Point(0, 0), link.sprout, delta);
     }
   });
 }
 
 function sprout_new(center) {
   sprout_layer.activate()
-  var sprout = new Path.Circle({
+  var sprout = new paper.Path.Circle({
     center: center,
     radius: radius,
     fillColor: alive_inside,
@@ -257,11 +255,26 @@ function sprout_unselect(sprout) {
 // Main program
 // ------------
 
-background_layer.activate();
-new Path.Rectangle({
-  center: view.center,
-  size: view.size,
-  fillColor: 'beige'
-});
+window.onload = function() {
 
-add_initial_sprouts(3);
+  // Prepare the canvas.
+  paper.setup('sprouts');
+  new paper.Path.Rectangle({
+    center: paper.view.center,
+    size: paper.view.size,
+    fillColor: 'beige'
+  });
+
+  // Draw the initial display.
+  sprout_layer = new paper.Layer();
+  line_layer = new paper.Layer();
+  add_initial_sprouts(3);
+  paper.view.draw();
+
+  // Install mouse actions.
+  var tool = new paper.Tool();
+  tool.minDistance = 15;
+  tool.onMouseDown = onMouseDown;
+  tool.onMouseDrag = onMouseDrag;
+  tool.onMouseUp = onMouseUp;
+}
