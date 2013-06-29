@@ -3,10 +3,8 @@
 
 var debug = false;
 
-if (debug) {
-  function log(text) { console.log(text); }
-} else {
-  function log(text) { }
+function log(text) {
+  if (debug) console.log(text);
 }
 
 // Drawings
@@ -166,7 +164,7 @@ function add_initial_sprouts(count) {
   var delta = 360 / count;
   var offset = new Point();
   var size = view.size;
-  offset.length = Math.min(size.width, size.height) * 1 / 3;
+  offset.length = Math.min(size.width, size.height) / 3;
   offset.angle = Math.random() * delta;
   for (var counter = 0; counter < count; counter++) {
     sprout_new(view.center + offset);
@@ -176,22 +174,22 @@ function add_initial_sprouts(count) {
 
 function nearest_sprout(point) {
   var ambiguous = true;
-  var best = null;
+  var best_sprout = null;
+  var best_distance;
   sprout_layer.children.forEach(function(sprout) {
     var distance = (sprout.data.center - point).length
-    if (distance < 100) {
-      if (sprout.data.links.length < 3) {
-        if (best == null || 2 * distance < (best.data.center - point).length) {
-          ambiguous = false;
-          best = sprout;
-        } else if (distance < 2 * (best.data.center - point).length) {
-          ambiguous = true;
-        }
+    if (distance < 100 && sprout.data.links.length < 3) {
+      if (best_sprout == null || 2 * distance < best_distance) {
+        ambiguous = false;
+        best_sprout = sprout;
+        best_distance = distance;
+      } else if (distance < 2 * best_distance) {
+        ambiguous = true;
       }
     }
   });
   if (ambiguous) return null;
-  return best;
+  return best_sprout;
 }
 
 function sprout_move(sprout, center) {
