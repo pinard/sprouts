@@ -7,16 +7,16 @@ function log(text) {
   if (debug) console.log(text);
 }
 
-// Drawings
+// Lines
 // --------
 
 tool.minDistance = 15;
-var current_drawing = null;
+var current_line = null;
 var starting_sprout;
 
-function drawing_links(drawing, sprout1, sprout2) {
-  sprout1.data.links.push(new Link(sprout2, drawing, true));
-  sprout2.data.links.push(new Link(sprout1, drawing, false));
+function line_links(line, sprout1, sprout2) {
+  sprout1.data.links.push(new Link(sprout2, line, true));
+  sprout2.data.links.push(new Link(sprout1, line, false));
   if (sprout1.data.links.length > 2) {
     sprout1.fillColor = dead_inside;
     sprout1.strokeColor = dead_outside;
@@ -27,8 +27,8 @@ function drawing_links(drawing, sprout1, sprout2) {
   }
 }
 
-function drawing_move(drawing, sprout1, delta1, sprout2, delta2) {
-  var segments = drawing.segments;
+function line_move(line, sprout1, delta1, sprout2, delta2) {
+  var segments = line.segments;
   var m1 = segments.length - 1;
   var delta = delta1;
   var epsilon = (delta2 - delta1) / m1;
@@ -36,7 +36,7 @@ function drawing_move(drawing, sprout1, delta1, sprout2, delta2) {
     segment.point += delta;
     delta += epsilon;
   });
-  drawing.smooth();
+  line.smooth();
   var location1 = sprout1.getNearestLocation(segments[1].point);
   segments[0].point = location1.point;
   segments[0].handleOut.angle = sprout1.getNormalAt(location1.offset).angle;
@@ -56,12 +56,12 @@ function onMouseDown(event) {
   starting_sprout = nearest_sprout(event.point);
   if (starting_sprout == null) return;
   var point = starting_sprout.getNearestLocation(event.point).point;
-  current_drawing = new Path({
+  current_line = new Path({
     segments: [point],
     strokeColor: 'brown',
     strokeWidth: 3
   });
-  if (debug) current_drawing.strokeWidth = 1;
+  if (debug) current_line.strokeWidth = 1;
 }
 
 function onMouseDrag(event) {
@@ -69,11 +69,11 @@ function onMouseDrag(event) {
     sprout_move(dragged_sprout, event.point);
     return;
   }
-  if (current_drawing == null) return;
-  current_drawing.add(event.point);
-  if (layer_touched(drawing_layer, current_drawing)) {
-    current_drawing.remove();
-    current_drawing = null;
+  if (current_line == null) return;
+  current_line.add(event.point);
+  if (layer_touched(line_layer, current_line)) {
+    current_line.remove();
+    current_line = null;
   }
 }
 
@@ -82,45 +82,45 @@ function onMouseUp(event) {
     dragged_sprout = null;
     return;
   }
-  if (current_drawing == null) return;
-  if (current_drawing.segments.length < 3) {
+  if (current_line == null) return;
+  if (current_line.segments.length < 3) {
     // Prevent sprouts overlapping.
-    current_drawing.remove();
-    current_drawing = null;
+    current_line.remove();
+    current_line = null;
     return;
   }
   var ending_sprout = nearest_sprout(event.point);
   if (ending_sprout == null) {
-    current_drawing.remove();
-    current_drawing = null;
+    current_line.remove();
+    current_line = null;
     return;
   }
   if (ending_sprout == starting_sprout &&
       starting_sprout.data.links.length > 1) {
     // Prevent looping on a sprout with no room for two more links.
-    current_drawing.remove();
-    current_drawing = null;
+    current_line.remove();
+    current_line = null;
     return;
   }
   var point = ending_sprout.getNearestLocation(event.point);
-  current_drawing.add(point);
-  if (layer_touched(drawing_layer, current_drawing)) {
-    current_drawing.remove();
-    current_drawing = null;
+  current_line.add(point);
+  if (layer_touched(line_layer, current_line)) {
+    current_line.remove();
+    current_line = null;
     return;
   }
-  current_drawing.simplify(10);
+  current_line.simplify(10);
 
-  // Add a new sprout in the middle, and split the drawing in two.
+  // Add a new sprout in the middle, and split the line in two.
   var sprout = sprout_new(
-    current_drawing.getPointAt(current_drawing.length / 2));
-  var drawing1 = current_drawing;
-  current_drawing = drawing1.split(drawing1.length / 2 - radius);
-  var drawing2 = current_drawing.split(2 * radius);
-  current_drawing.remove();
-  current_drawing = null;
-  drawing_links(drawing1, starting_sprout, sprout);
-  drawing_links(drawing2, sprout, ending_sprout);
+    current_line.getPointAt(current_line.length / 2));
+  var line1 = current_line;
+  current_line = line1.split(line1.length / 2 - radius);
+  var line2 = current_line.split(2 * radius);
+  current_line.remove();
+  current_line = null;
+  line_links(line1, starting_sprout, sprout);
+  line_links(line2, sprout, ending_sprout);
 }
 
 // Layers
@@ -128,7 +128,7 @@ function onMouseUp(event) {
 
 var background_layer = project.activeLayer;
 var sprout_layer = new Layer();
-var drawing_layer = new Layer();
+var line_layer = new Layer();
 
 function layer_touched(layer, path) {
   for (var counter = 0; counter < layer.children.length; counter++) {
@@ -141,9 +141,9 @@ function layer_touched(layer, path) {
 // Links
 // -----
 
-function Link(sprout, drawing, starting) {
+function Link(sprout, line, starting) {
   this.sprout = sprout;
-  this.drawing = drawing;
+  this.line = line;
   this.starting = starting;
 }
 
@@ -200,10 +200,10 @@ function sprout_move(sprout, center) {
   dragged_sprout.data.center = center;
   sprout.data.links.forEach(function(link) {
     if (link.starting) {
-      drawing_move(link.drawing,
+      line_move(link.line,
                    sprout, delta, link.sprout, new Point(0, 0));
     } else {
-      drawing_move(link.drawing,
+      line_move(link.line,
                    sprout, new Point(0, 0), link.sprout, delta);
     }
   });
@@ -222,7 +222,7 @@ function sprout_new(center) {
   sprout.data.links = []
   sprout.on('mouseenter', function() { sprout_select(sprout); });
   sprout.on('mouseleave', function() { sprout_unselect(sprout); });
-  drawing_layer.activate();
+  line_layer.activate();
   return sprout;
 }
 
@@ -235,7 +235,7 @@ function sprout_select(sprout) {
   };
   if (debug) {
     sprout.data.links.forEach(function(link) {
-      link.drawing.selected = true;
+      link.line.selected = true;
     })
   }
 }
@@ -249,7 +249,7 @@ function sprout_unselect(sprout) {
   };
   if (debug) {
     sprout.data.links.forEach(function(link) {
-      link.drawing.selected = false;
+      link.line.selected = false;
     })
   }
 }

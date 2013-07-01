@@ -11,11 +11,11 @@ many ways, see issues below.
 
 To play, get the mouse near a sprout, but not on the sprout itself,
 then draw a connection line by clicking and dragging near another (or
-the same) sprout.  When you release the mouse, your drawing is split
-in two and a new sprout gets added in the middle.  If a region becomes
+the same) sprout.  When you release the mouse, your line is split in
+two and a new sprout gets added in the middle.  If a region becomes
 too crowded, you may drag sprouts around by clicking directly on the
 sprouts themselves, yet pay attention while doing so at not having
-drawings crossing each other.  To re-initialize the game, reload the
+lines crossing each other.  To re-initialize the game, reload the
 page.
 
 ** Installation
@@ -26,14 +26,13 @@ the =js/= subdirectory of the Web site: adjust to taste!
 ** General issues
 
 - Should add buttons for selecting the number of initial sprouts,
-  reinitializing the game, deciding about different colorations for
-  dead sprouts, deciding animation, etc.
+  deciding of options like animation, debugging, etc.
 
 - Should add an Undo button, and maybe button to remove any sprout.
 
-- A single drawing should not be allowed to cross itself.
+- A single line should not be allowed to cross itself.
 
-- A drawing should not touch a sprout, except the limiting ones.
+- A line should not touch a sprout, except the limiting ones.
 
 - An isolated, unreachable sprout should be marked dead.
 
@@ -44,20 +43,21 @@ the =js/= subdirectory of the Web site: adjust to taste!
 - Animation is explored on the =animation= branch on GitHub and stays
   away from the =master= branch, until it becomes a bit satisfactory!
 
-- Have sprouts interact on one another using (1 / K*d - 1 / d^2), a
-  positive value attracts, a negative value repels.  In this way, two
-  sprouts in equilibrium have a distance K between them.  For now, I
-  rather tried the simpler (K - d) and found out that sprouts displace
-  far too much.  Any usable dynamic ought to correctly handle drawings
-  from the start.
-
 - Aim that the whole display occupies maybe .75 of the view area.  If
-  too big, slightly decrease K, if too small, slightly increase K.
+  too big, slightly decrease =K=, if too small, slightly increase =K= (=K=
+  is explained below).
 
-- Drawings should repel each other, and should repel neighbouring
-  sprouts as well.
+- Lines should repel each other, and should repel neighbouring sprouts
+  as well.
 
-- Unattended drawings should progressively smooth and simplify, given
+- Have sprouts interact on one another using =(1 / K*d - 1 / d^2)=, a
+  positive value attracts, a negative value repels.  In this way, two
+  sprouts in equilibrium have a distance =K= between them.  For now, I
+  rather tried the simpler =(K - d)= and found out that sprouts displace
+  far too much: any usable dynamic ought to correctly handle line
+  repulsion from the start.
+
+- Unattended lines should progressively smooth and simplify, given
   they stay separate of course.
 
 - Have the speed of the animation depends on the travelled distance,
