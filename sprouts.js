@@ -11,14 +11,28 @@ function log(text) {
 // Angular
 // -------
 
+// A function called in Paper may not force changes into Angular and
+// itself be called by Angular, as a recursive $apply is forbidden.
+// Simplest is to keep copying and $digest functions well separate.
+
 function Controller($scope) {
   $scope.new_game = new_game;
-  $scope.update_angular = function() {
+  $scope.angular_copy = function() {
     $scope.initial_count = initial_count;
     $scope.line_layer = line_layer;
     $scope.paper = paper;
     $scope.sprout_layer = sprout_layer;
-  };
+  }
+}
+
+function angular_copy() {
+  var scope = angular.element('body').scope();
+  scope.angular_copy();
+}
+
+function angular_digest() {
+  var scope = angular.element('body').scope();
+  scope.$digest();
 }
 
 // Lines
@@ -134,6 +148,8 @@ function onMouseUp(event) {
   current_line = null;
   line_links(line1, starting_sprout, sprout);
   line_links(line2, sprout, ending_sprout);
+  angular_copy();
+  angular_digest();
 }
 
 // Layers
@@ -222,6 +238,7 @@ function new_game(count) {
 
   // Show them all.
   paper.view.draw();
+  angular_copy();
 }
 
 function sprout_move(sprout, center) {
@@ -296,6 +313,7 @@ window.onload = function() {
   sprout_layer = new paper.Layer();
   line_layer = new paper.Layer();
   new_game();
+  angular_digest();
 
   // Install mouse actions.
   var tool = new paper.Tool();
