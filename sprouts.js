@@ -7,6 +7,18 @@ function log(text) {
   if (debug) console.log(text);
 }
 
+// Angular
+// -------
+
+function Controller($scope) {
+  $scope.new_game = new_game;
+  $scope.update_angular = function() {
+    $scope.paper = paper;
+    $scope.line_layer = drawing_layer;
+    $scope.sprout_layer = sprout_layer;
+  };
+}
+
 // Lines
 // --------
 
@@ -190,6 +202,20 @@ function nearest_sprout(point) {
   return best_sprout;
 }
 
+function new_game() {
+  console.log('restart (debug ' + debug + '): '
+             + drawing_layer.children.length + ' drawings, '
+             + sprout_layer.children.length + ' sprouts.');
+  drawing_layer.children.slice().forEach(function(drawing) {
+    drawing.remove();
+  });
+  sprout_layer.children.slice().forEach(function(sprout) {
+    sprout.remove();
+  });
+  add_initial_sprouts(3);
+  paper.view.draw();
+}
+
 function sprout_move(sprout, center) {
   var delta = center.subtract(sprout.data.center);
   sprout.segments.forEach(function(segment) {
@@ -268,8 +294,7 @@ window.onload = function() {
   // Draw the initial display.
   sprout_layer = new paper.Layer();
   line_layer = new paper.Layer();
-  add_initial_sprouts(3);
-  paper.view.draw();
+  new_game();
 
   // Install mouse actions.
   var tool = new paper.Tool();

@@ -1,33 +1,47 @@
 <!DOCTYPE html>
-<html ng-app>
+<html ng-app lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <script src="js/angular.js"></script>
     <script src="js/paper.js"></script>
     <script src="sprouts.js"></script>
-    <script>
-      function Controller($scope) {
-          $scope.repaper = function() {
-              $scope.paper = paper;
-              $scope.sprout_layer = sprout_layer;
-          };
-          //$scope.repaper();
-      }
-    </script>
   </head>
   <body ng-controller="Controller">
-    <h3 align="center">Sprouts game board</h3>
-    <p><button ng-click="repaper()">Sync</button> Debug: {{ sprout_layer.children.length }}</p>
-    <p><input ng-model="query">Query: {{ query + ' ' + sprout_layer.children.length }}</p>
-    <ul>
-      <li ng-repeat="sprout in sprout_layer.children">{{query + ' ' + sprout}}</li>
-    </ul>
-    <div align="center">
-      <p>
-        See <a href="http://nrich.maths.org/1208">game description</a>
-        and <a href="https://github.com/pinard/sprouts/blob/master/README.org">how
-        to play</a>.
-     </p>
+    <div class="row-fluid">
+
+      <div align="right" class="btn-group span2">
+        <button class="btn" ng-click="new_game()">New</button>
+      </div>
+
+      <div align="left" class="btn-group span3">
+        <button class="btn" ng-click="update_angular()">Angular</button>
+        <span class="btn"><input ng-model="debug" type="checkbox">Debug</input></span>
+      </div>
+
+      <span align="center" class="span2"><h4>Sprouts board</h4></span>
+
+      <div align="right" class="btn-group span3">
+        <span class="btn">{{ sprout_layer.children.length }} sprouts</span>
+        <span class="btn">{{ line_layer.children.length }} lines</span>
+      </div>
+
+      <div align="left" class="btn-group span2">
+        <button class="btn">
+          <a href="http://nrich.maths.org/1208">Game rules</a>
+        </button>
+        <button class="btn">
+          <a href="https://github.com/pinard/sprouts/blob/master/README.org#playing">
+            How to play
+          </a>
+        </button>
+      </div>
+
     </div>
-    <canvas id="sprouts" resize="true"></canvas>
+    <canvas id="sprouts" resize="true"
+            style="background-color: beige; border: 1px solid black;">
+    </canvas>
   </body>
 </html>
