@@ -13,7 +13,24 @@
     <div class="row-fluid">
 
       <div align="right" class="btn-group span2">
-        <button class="btn" ng-click="new_game()">New</button>
+        <div class="btn-group">
+          <button class="btn" ng-click="new_game()">New ({{ initial_count }})</button>
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><button class="btn btn-link" ng-click="new_game(3)">3 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(4)">4 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(5)">5 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(6)">6 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(7)">7 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(8)">8 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(9)">9 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(10)">10 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(11)">11 sprouts</button>
+            <li><button class="btn btn-link" ng-click="new_game(12)">12 sprouts</button>
+          </ul>
+        </div>
       </div>
 
       <div align="left" class="btn-group span3">

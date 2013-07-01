@@ -2,6 +2,7 @@
 // François Pinard, 2013-06.
 
 var debug = false;
+var initial_count = 3;
 
 function log(text) {
   if (debug) console.log(text);
@@ -13,8 +14,9 @@ function log(text) {
 function Controller($scope) {
   $scope.new_game = new_game;
   $scope.update_angular = function() {
+    $scope.initial_count = initial_count;
+    $scope.line_layer = line_layer;
     $scope.paper = paper;
-    $scope.line_layer = drawing_layer;
     $scope.sprout_layer = sprout_layer;
   };
 }
@@ -170,18 +172,6 @@ var dead_over = 'cyan';
 var dragged_sprout = null;
 var selected_sprout = null;
 
-function add_initial_sprouts(count) {
-  var delta = 360 / count;
-  var offset = new paper.Point();
-  var size = paper.view.size;
-  offset.length = Math.min(size.width, size.height) / 3;
-  offset.angle = Math.random() * delta;
-  for (var counter = 0; counter < count; counter++) {
-    sprout_new(paper.view.center.add(offset));
-    offset.angle += delta;
-  }
-}
-
 function nearest_sprout(point) {
   var ambiguous = true;
   var best_sprout = null;
@@ -202,17 +192,35 @@ function nearest_sprout(point) {
   return best_sprout;
 }
 
-function new_game() {
-  console.log('restart (debug ' + debug + '): '
-             + drawing_layer.children.length + ' drawings, '
-             + sprout_layer.children.length + ' sprouts.');
-  drawing_layer.children.slice().forEach(function(drawing) {
-    drawing.remove();
+function new_game(count) {
+
+  // Decide how many sprouts.
+  if (count == null) {
+    count = initial_count;
+  } else {
+    initial_count = count;
+  };
+
+  // Erase any previous game.
+  line_layer.children.slice().forEach(function(line) {
+    line.remove();
   });
   sprout_layer.children.slice().forEach(function(sprout) {
     sprout.remove();
   });
-  add_initial_sprouts(3);
+
+  // Add initial sprouts.
+  var delta = 360 / count;
+  var offset = new paper.Point();
+  var grow = paper.view.size.divide(3);
+  offset.length = 1
+  offset.angle = Math.random() * delta;
+  for (var counter = 0; counter < count; counter++) {
+    sprout_new(paper.view.center.add(offset.multiply(grow)));
+    offset.angle += delta;
+  };
+
+  // Show them all.
   paper.view.draw();
 }
 
@@ -283,15 +291,8 @@ function sprout_unselect(sprout) {
 
 window.onload = function() {
 
-  // Prepare the canvas.
-  paper.setup('sprouts');
-  new paper.Path.Rectangle({
-    center: paper.view.center,
-    size: paper.view.size,
-    fillColor: 'beige'
-  });
-
   // Draw the initial display.
+  paper.setup('sprouts');
   sprout_layer = new paper.Layer();
   line_layer = new paper.Layer();
   new_game();
