@@ -3,9 +3,12 @@
 Sprouts is yet another game invented by John Conway!  There is an
 article about it in [[http://nrich.maths.org/2413][Sprouts Explained]].
 
-This project is merely an exercise for me to explore [[http://paperjs.org/][Paper.js]] and
-JavaScript.  The tool is still fairly modest, it could be improved in
-many ways, see issues below.
+This project is merely an exercise for me to explore [[http://paperjs.org/][Paper.js]],
+JavaScript, and such things ☺.  The tool is still fairly modest, it
+could be improved in many ways, see issues below.
+
+To try the game without installing it, use my [[http://pinard.progiciels-bpi.ca/sprouts.html][experimental site]], yet
+there is no guarantee that it is always available.
 
 ** Playing
 
@@ -20,8 +23,10 @@ page.
 
 ** Installation
 
-To install, you also need a prepared copy of [[http://paperjs.org/][Paper.js]].  I keep mine in
-the =js/= subdirectory of the Web site: adjust to taste!
+To install, you also need a prepared copies of [[http://angularjs.org/][AngularJS]], [[http://backbonejs.org/][Backbone.js]],
+[[http://jquery.org][jQuery]] and [[http://paperjs.org/][Paper.js]].  I keep mine in the =css/= and =js/= subdirectories
+of the Web site: adjust to taste!  /Paper.js/ is the main tool.  /jQuery/
+is needed (is it?), but only indirectly by /Backbone.js/.
 
 ** General issues
 
